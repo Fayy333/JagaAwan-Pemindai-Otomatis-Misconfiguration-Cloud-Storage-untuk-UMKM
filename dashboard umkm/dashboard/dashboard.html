@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>JagaAwan — Dashboard Keamanan</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --clr-aman:   #38a169;
+      --clr-rendah: #d69e2e;
+      --clr-sedang: #dd6b20;
+      --clr-tinggi: #e53e3e;
+      --clr-bg:     #f7fafc;
+      --clr-card:   #ffffff;
+      --clr-border: #e2e8f0;
+    }
+
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: var(--clr-bg);
+      color: #2d3748;
+      min-height: 100vh;
+    }
+
+    /* ── Header ───────────────────────────────── */
+    header {
+      background: linear-gradient(135deg, #1a73e8 0%, #0d47a1 100%);
+      color: white;
+      padding: 1.25rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+
+    header h1 { font-size: 1.4rem; display: flex; align-items: center; gap: 0.5rem; }
+    header p  { font-size: 0.85rem; opacity: 0.85; margin-top: 0.2rem; }
+
+    .btn-refresh {
+      background: rgba(255,255,255,0.15);
+      border: 1px solid rgba(255,255,255,0.4);
+      color: white;
+      border-radius: 8px;
+      padding: 0.5rem 1rem;
+      cursor: pointer;
+      font-size: 0.85rem;
+      transition: background 0.2s;
+    }
+    .btn-refresh:hover { background: rgba(255,255,255,0.3); }
+
+    /* ── Main layout ──────────────────────────── */
+    main { padding: 1.5rem 2rem; max-width: 1100px; margin: 0 auto; }
+
+    /* ── Status bar ───────────────────────────── */
+    #status-bar {
+      background: white;
+      border: 1px solid var(--clr-border);
+      border-radius: 10px;
+      padding: 0.6rem 1rem;
+      font-size: 0.8rem;
+      color: #718096;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    /* ── KPI cards ────────────────────────────── */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.75rem;
+    }
+
+    .kpi-card {
+      background: var(--clr-card);
+      border: 1px solid var(--clr-border);
+      border-radius: 12px;
+      padding: 1.1rem 1.25rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+
+    .kpi-card .label {
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: #718096;
+      margin-bottom: 0.4rem;
+    }
+
+    .kpi-card .value {
+      font-size: 2rem;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .kpi-card .sub {
+      font-size: 0.75rem;
+      color: #a0aec0;
+      margin-top: 0.3rem;
+    }
+
+    /* Skor meter */
+    .score-meter {
+      height: 6px;
+      border-radius: 3px;
+      background: #e2e8f0;
+      margin-top: 0.6rem;
+      overflow: hidden;
+    }
+    .score-meter-fill {
+      height: 100%;
+      border-radius: 3px;
+      transition: width 0.6s ease;
+    }
+
+    /* ── Findings table ───────────────────────── */
+    .section-title {
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: #4a5568;
+      margin-bottom: 0.75rem;
+    }
+
+    .table-wrapper {
+      background: white;
+      border: 1px solid var(--clr-border);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      margin-bottom: 1.75rem;
+    }
+
+    table { width: 100%; border-collapse: collapse; }
+
+    thead th {
+      background: #f7fafc;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #718096;
+      padding: 0.75rem 1rem;
+      text-align: left;
+      border-bottom: 1px solid var(--clr-border);
+    }
+
+    tbody tr { border-bottom: 1px solid #f0f4f8; }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: #f7fafc; }
+
+    td {
+      padding: 0.85rem 1rem;
+      font-size: 0.85rem;
+      vertical-align: top;
+    }
+
+    td.bucket-name { font-family: monospace; font-size: 0.8rem; }
+
+    /* Risk badge */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      border-radius: 999px;
+      padding: 0.2rem 0.65rem;
+      font-size: 0.72rem;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    .badge-AMAN   { background: #c6f6d5; color: #22543d; }
+    .badge-RENDAH { background: #fef3c7; color: #78350f; }
+    .badge-SEDANG { background: #fed7aa; color: #7c2d12; }
+    .badge-TINGGI { background: #fed7d7; color: #742a2a; }
+
+    /* Icon flags */
+    .icon-ok  { color: var(--clr-aman); }
+    .icon-err { color: var(--clr-tinggi); }
+
+    td.saran { font-size: 0.78rem; color: #4a5568; max-width: 300px; }
+
+    /* ── Empty / loading / error ──────────────── */
+    .state-msg {
+      text-align: center;
+      padding: 3rem 1rem;
+      color: #a0aec0;
+      font-size: 0.9rem;
+    }
+
+    /* ── Footer ───────────────────────────────── */
+    footer {
+      text-align: center;
+      padding: 1.5rem;
+      font-size: 0.75rem;
+      color: #cbd5e0;
+    }
+
+    /* ── Responsive ───────────────────────────── */
+    @media (max-width: 600px) {
+      main { padding: 1rem; }
+      header { padding: 1rem; }
+      td.saran { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>☁️ JagaAwan</h1>
+    <p>Dashboard Keamanan Bucket Cloud Storage</p>
+  </div>
+  <button class="btn-refresh" onclick="muatData()">🔄 Perbarui</button>
+</header>
+
+<main>
+
+  <!-- Status bar -->
+  <div id="status-bar">
+    <span id="status-icon">⏳</span>
+    <span id="status-text">Memuat data...</span>
+  </div>
+
+  <!-- KPI -->
+  <div class="kpi-grid">
+    <div class="kpi-card">
+      <div class="label">Skor Keamanan</div>
+      <div class="value" id="kpi-skor" style="color:#1a73e8">—</div>
+      <div class="score-meter"><div class="score-meter-fill" id="meter" style="width:0%"></div></div>
+      <div class="sub">dari 100</div>
+    </div>
+    <div class="kpi-card">
+      <div class="label">Total Bucket</div>
+      <div class="value" id="kpi-total">—</div>
+      <div class="sub">diperiksa</div>
+    </div>
+    <div class="kpi-card">
+      <div class="label">🔴 Risiko Tinggi</div>
+      <div class="value" id="kpi-tinggi" style="color:var(--clr-tinggi)">—</div>
+      <div class="sub">bucket</div>
+    </div>
+    <div class="kpi-card">
+      <div class="label">🟠 Risiko Sedang</div>
+      <div class="value" id="kpi-sedang" style="color:var(--clr-sedang)">—</div>
+      <div class="sub">bucket</div>
+    </div>
+    <div class="kpi-card">
+      <div class="label">🟡 Risiko Rendah</div>
+      <div class="value" id="kpi-rendah" style="color:var(--clr-rendah)">—</div>
+      <div class="sub">bucket</div>
+    </div>
+    <div class="kpi-card">
+      <div class="label">🟢 Aman</div>
+      <div class="value" id="kpi-aman" style="color:var(--clr-aman)">—</div>
+      <div class="sub">bucket</div>
+    </div>
+  </div>
+
+  <!-- Findings table -->
+  <div class="section-title">Temuan Pindaian</div>
+  <div class="table-wrapper">
+    <table>
+      <thead>
+        <tr>
+          <th>Bucket</th>
+          <th>Risiko</th>
+          <th>Kode</th>
+          <th>Publik</th>
+          <th>PAP Aktif</th>
+          <th>Pengurang</th>
+          <th class="saran">Saran</th>
+        </tr>
+      </thead>
+      <tbody id="tabel-temuan">
+        <tr><td colspan="7"><div class="state-msg">⏳ Memuat…</div></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+</main>
+
+<footer>JagaAwan &bull; Proyek Demo Komputasi Awan &bull; Data diperbarui setiap hari</footer>
+
+<script>
+  // ─────────────────────────────────────────────────────────────────
+  // KONFIGURASI
+  // Ganti URL_RESULTS dengan URL endpoint Cloud Run Functions "results".
+  // Selama pengembangan / demo lokal, data-contoh.json digunakan sebagai fallback.
+  // ─────────────────────────────────────────────────────────────────
+  const URL_RESULTS = "GANTI_DENGAN_URL_ENDPOINT_RESULTS";
+  const URL_FALLBACK = "data-contoh.json";   // digunakan jika URL_RESULTS belum diisi
+
+  // ─────────────────────────────────────────────────────────────────
+
+  const RISIKO_ICON = { AMAN: "🟢", RENDAH: "🟡", SEDANG: "🟠", TINGGI: "🔴" };
+
+  function skorKeWarna(skor) {
+    if (skor >= 80) return "var(--clr-aman)";
+    if (skor >= 60) return "var(--clr-rendah)";
+    if (skor >= 40) return "var(--clr-sedang)";
+    return "var(--clr-tinggi)";
+  }
+
+  function skorKeMeterWarna(skor) {
+    if (skor >= 80) return "#38a169";
+    if (skor >= 60) return "#d69e2e";
+    if (skor >= 40) return "#dd6b20";
+    return "#e53e3e";
+  }
+
+  function formatWaktu(iso) {
+    if (!iso) return "—";
+    try {
+      return new Date(iso).toLocaleString("id-ID", {
+        dateStyle: "long", timeStyle: "short", timeZone: "Asia/Jakarta"
+      });
+    } catch { return iso; }
+  }
+
+  function setStatus(icon, teks) {
+    document.getElementById("status-icon").textContent = icon;
+    document.getElementById("status-text").textContent  = teks;
+  }
+
+  function tampilkanData(data) {
+    const temuan = data.temuan || [];
+
+    // KPI skor
+    const skor = data.skor ?? 0;
+    const kpiSkor = document.getElementById("kpi-skor");
+    kpiSkor.textContent = skor;
+    kpiSkor.style.color = skorKeWarna(skor);
+
+    const meter = document.getElementById("meter");
+    meter.style.width = skor + "%";
+    meter.style.background = skorKeMeterWarna(skor);
+
+    // KPI counts
+    document.getElementById("kpi-total").textContent  = data.jumlah_bucket ?? temuan.length;
+    document.getElementById("kpi-tinggi").textContent = temuan.filter(t => t.risiko === "TINGGI").length;
+    document.getElementById("kpi-sedang").textContent = temuan.filter(t => t.risiko === "SEDANG").length;
+    document.getElementById("kpi-rendah").textContent = temuan.filter(t => t.risiko === "RENDAH").length;
+    document.getElementById("kpi-aman").textContent   = temuan.filter(t => t.risiko === "AMAN").length;
+
+    // Status bar
+    setStatus("✅", `Scan ID: ${data.scan_id ?? "—"} · Waktu: ${formatWaktu(data.timestamp)}`);
+
+    // Tabel
+    const tbody = document.getElementById("tabel-temuan");
+    if (temuan.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="7"><div class="state-msg">Tidak ada bucket yang ditemukan.</div></td></tr>`;
+      return;
+    }
+
+    // Urutkan: TINGGI → SEDANG → RENDAH → AMAN
+    const urutan = { TINGGI: 0, SEDANG: 1, RENDAH: 2, AMAN: 3 };
+    const sorted = [...temuan].sort((a, b) => (urutan[a.risiko] ?? 9) - (urutan[b.risiko] ?? 9));
+
+    tbody.innerHTML = sorted.map(t => `
+      <tr>
+        <td class="bucket-name">${escHtml(t.bucket)}</td>
+        <td><span class="badge badge-${escHtml(t.risiko)}">${RISIKO_ICON[t.risiko] ?? ""} ${escHtml(t.risiko)}</span></td>
+        <td><code>${escHtml(t.kode)}</code></td>
+        <td>${t.publik    ? '<span class="icon-err">✖ Ya</span>'  : '<span class="icon-ok">✔ Tidak</span>'}</td>
+        <td>${t.pap_aktif ? '<span class="icon-ok">✔ Ya</span>'  : '<span class="icon-err">✖ Tidak</span>'}</td>
+        <td style="font-weight:600">−${t.pengurang}</td>
+        <td class="saran">${escHtml(t.saran)}</td>
+      </tr>
+    `).join("");
+  }
+
+  function escHtml(str) {
+    return String(str ?? "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  }
+
+  async function muatData() {
+    setStatus("⏳", "Memuat data...");
+    document.getElementById("tabel-temuan").innerHTML =
+      `<tr><td colspan="7"><div class="state-msg">⏳ Memuat…</div></td></tr>`;
+
+    // Gunakan endpoint asli; jika belum dikonfigurasi, gunakan data-contoh.json
+    const url = URL_RESULTS.startsWith("http") ? URL_RESULTS : URL_FALLBACK;
+
+    try {
+      const resp = await fetch(url);
+      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+      const data = await resp.json();
+
+      if (data.status === "belum_ada_data") {
+        setStatus("ℹ️", "Belum ada data pindaian. Jalankan fungsi scan terlebih dahulu.");
+        document.getElementById("tabel-temuan").innerHTML =
+          `<tr><td colspan="7"><div class="state-msg">Belum ada data.</div></td></tr>`;
+        return;
+      }
+
+      tampilkanData(data);
+    } catch (err) {
+      setStatus("❌", `Gagal memuat data: ${err.message}`);
+      document.getElementById("tabel-temuan").innerHTML =
+        `<tr><td colspan="7"><div class="state-msg">❌ Gagal: ${escHtml(err.message)}</div></td></tr>`;
+    }
+  }
+
+  // Muat data saat halaman dibuka
+  muatData();
+</script>
+
+</body>
+</html>

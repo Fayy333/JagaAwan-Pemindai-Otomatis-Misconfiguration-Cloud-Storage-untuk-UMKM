@@ -1,0 +1,48 @@
+{
+  "scan_id": "scan-20251101-080000",
+  "timestamp": "2025-11-01T08:00:00Z",
+  "skor": 55,
+  "jumlah_bucket": 4,
+  "temuan": [
+    {
+      "bucket": "bucket-kondisi-a",
+      "risiko": "TINGGI",
+      "kode": "PUB-NO-PAP",
+      "pengurang": 30,
+      "penjelasan": "Bucket dapat diakses publik dan Public Access Prevention (PAP) tidak aktif.",
+      "saran": "Segera aktifkan Public Access Prevention dan hapus binding allUsers / allAuthenticatedUsers dari IAM policy.",
+      "publik": true,
+      "pap_aktif": false
+    },
+    {
+      "bucket": "bucket-kondisi-b",
+      "risiko": "SEDANG",
+      "kode": "PUB-PAP",
+      "pengurang": 15,
+      "penjelasan": "Bucket dapat diakses publik, tetapi PAP sudah aktif.",
+      "saran": "Tinjau kembali kebutuhan akses publik. Jika tidak diperlukan, cabut binding allUsers / allAuthenticatedUsers.",
+      "publik": true,
+      "pap_aktif": true
+    },
+    {
+      "bucket": "bucket-kondisi-c",
+      "risiko": "AMAN",
+      "kode": "PRIV-PAP",
+      "pengurang": 0,
+      "penjelasan": "Bucket tidak publik dan PAP aktif. Konfigurasi sudah baik.",
+      "saran": "Tidak ada tindakan yang diperlukan.",
+      "publik": false,
+      "pap_aktif": true
+    },
+    {
+      "bucket": "bucket-kondisi-d",
+      "risiko": "RENDAH",
+      "kode": "PRIV-NO-PAP",
+      "pengurang": 5,
+      "penjelasan": "Bucket tidak publik, namun PAP belum diaktifkan.",
+      "saran": "Aktifkan Public Access Prevention untuk mencegah pemberian akses publik secara tidak sengaja di masa mendatang.",
+      "publik": false,
+      "pap_aktif": false
+    }
+  ]
+}

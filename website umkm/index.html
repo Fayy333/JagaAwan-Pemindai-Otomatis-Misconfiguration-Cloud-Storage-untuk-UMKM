@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Batik Kita Jogja</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background-color: #faf6f0;
+      color: #2b2118;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      background-color: #5a3a22;
+      color: #faf6f0;
+      text-align: center;
+      padding: 2rem 1rem;
+    }
+
+    header h1 {
+      font-size: clamp(1.6rem, 5vw, 2.4rem);
+      letter-spacing: 0.04em;
+      margin-bottom: 0.4rem;
+    }
+
+    header p {
+      font-size: clamp(0.9rem, 2.5vw, 1.1rem);
+      opacity: 0.85;
+      font-style: italic;
+    }
+
+    .banner {
+      background-color: #fff3cd;
+      color: #5a3a22;
+      text-align: center;
+      padding: 0.6rem 1rem;
+      font-size: 0.875rem;
+      font-weight: 600;
+      border-bottom: 1px solid #e8d8a0;
+    }
+
+    main {
+      flex: 1;
+      max-width: 1200px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 2rem 1rem;
+    }
+
+    .catalog-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 1.25rem;
+      color: #5a3a22;
+      border-left: 4px solid #5a3a22;
+      padding-left: 0.75rem;
+    }
+
+    .product-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .product-card {
+      background: #fff;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(90,58,34,0.10);
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .product-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 16px rgba(90,58,34,0.16);
+    }
+
+    .img-wrapper {
+      width: 100%;
+      aspect-ratio: 4 / 3;
+      background-color: #e0d6cc;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .img-wrapper img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .img-error {
+      display: none;
+      width: 100%;
+      height: 100%;
+      background-color: #cccccc;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 1rem;
+      color: #5a5a5a;
+      font-size: 0.8rem;
+      line-height: 1.4;
+      position: absolute;
+      top: 0; left: 0;
+    }
+
+    .card-info {
+      padding: 0.85rem 1rem;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .card-info h2 {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #2b2118;
+      line-height: 1.4;
+    }
+
+    .card-info .price {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #8a5a2b;
+    }
+
+    footer {
+      background-color: #5a3a22;
+      color: #d4b896;
+      text-align: center;
+      padding: 1rem;
+      font-size: 0.8rem;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Batik Kita Jogja</h1>
+    <p>Batik tulis asli Yogyakarta</p>
+  </header>
+
+  <div class="banner" role="note">
+    ⚠️ Website ini hanya untuk pengujian proyek kuliah (data fiktif).
+  </div>
+
+  <main>
+    <p class="catalog-title">Katalog Produk</p>
+    <div class="product-grid" id="product-grid"></div>
+  </main>
+
+  <footer>
+    <p>Proyek JagaAwan &mdash; data fiktif</p>
+  </footer>
+
+  <script>
+    const BUCKET = 'NAMA_BUCKET_FOTO';
+    const IMAGE_BASE_URL = `https://storage.googleapis.com/${BUCKET}/produk/`;
+
+    const products = [
+      { name: 'Kemeja Batik Parang',            price: 285000, image: 'kemeja-parang-01.jpg' },
+      { name: 'Kemeja Batik Kawung',             price: 295000, image: 'kemeja-kawung-01.jpg' },
+      { name: 'Dress Batik Mega Mendung',        price: 350000, image: 'dress-megamendung-01.jpg' },
+      { name: 'Dress Batik Truntum',             price: 340000, image: 'dress-truntum-01.jpg' },
+      { name: 'Kain Batik Sogan (per meter)',    price: 180000, image: 'kain-sogan-01.jpg' },
+      { name: 'Kain Batik Sidomukti (per meter)',price: 195000, image: 'kain-sidomukti-01.jpg' },
+    ];
+
+    function formatRupiah(amount) {
+      return 'Rp ' + amount.toLocaleString('id-ID');
+    }
+
+    function handleImgError(img, wrapper) {
+      img.style.display = 'none';
+      const errBox = wrapper.querySelector('.img-error');
+      errBox.style.display = 'flex';
+    }
+
+    const grid = document.getElementById('product-grid');
+
+    products.forEach(function(product) {
+      const card = document.createElement('article');
+      card.className = 'product-card';
+
+      const wrapper = document.createElement('div');
+      wrapper.className = 'img-wrapper';
+
+      const img = document.createElement('img');
+      img.src = IMAGE_BASE_URL + product.image;
+      img.alt = product.name;
+      img.loading = 'lazy';
+      img.onerror = function() { handleImgError(img, wrapper); };
+
+      const errBox = document.createElement('div');
+      errBox.className = 'img-error';
+      errBox.textContent = 'Foto tidak bisa dimuat (cek izin bucket)';
+
+      wrapper.appendChild(img);
+      wrapper.appendChild(errBox);
+
+      const info = document.createElement('div');
+      info.className = 'card-info';
+
+      const title = document.createElement('h2');
+      title.textContent = product.name;
+
+      const price = document.createElement('p');
+      price.className = 'price';
+      price.textContent = formatRupiah(product.price);
+
+      info.appendChild(title);
+      info.appendChild(price);
+
+      card.appendChild(wrapper);
+      card.appendChild(info);
+      grid.appendChild(card);
+    });
+  </script>
+
+</body>
+</html>
