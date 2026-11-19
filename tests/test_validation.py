@@ -1,4 +1,5 @@
-from backend.scanner import valid_temuan, valid_hasil, hitung_skor
+from common.validators import valid_temuan, valid_hasil
+from scanner.scanner import hitung_skor
 
 
 def test_valid_temuan_lolos():

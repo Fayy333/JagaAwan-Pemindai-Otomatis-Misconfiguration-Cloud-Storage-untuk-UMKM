@@ -1,5 +1,5 @@
 import pytest
-from core.validator import sanitize_bucket_name
+from common.validators import sanitize_bucket_name
 
 
 def test_valid_bucket():
