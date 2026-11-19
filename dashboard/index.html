@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard Keamanan Cloud - JagaAwan</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: #f4f6f9;
+      color: #212529;
+      padding: 2rem 1rem;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .container {
+      max-width: 1050px;
+      margin: 0 auto;
+      width: 100%;
+      flex: 1;
+    }
+
+    header {
+      margin-bottom: 2rem;
+      text-align: center;
+    }
+
+    header h1 {
+      font-size: 2.2rem;
+      color: #1a202c;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+
+    header p {
+      color: #6c757d;
+      margin-top: 0.3rem;
+    }
+
+    /* Score Card */
+    .score-card {
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 2rem;
+      text-align: center;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+      margin-bottom: 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .score-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #4a5568;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .score-circle {
+      width: 130px;
+      height: 130px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3.2rem;
+      font-weight: 800;
+      color: #ffffff;
+      margin: 1.2rem 0;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+      transition: background-color 0.3s;
+    }
+
+    .score-meta {
+      font-size: 0.9rem;
+      color: #718096;
+    }
+
+    /* Status Colors */
+    .score-green  { background-color: #28a745; }
+    .score-yellow { background-color: #ffc107; color: #212529 !important; }
+    .score-red    { background-color: #dc3545; }
+
+    .badge {
+      display: inline-block;
+      padding: 0.35rem 0.75rem;
+      border-radius: 50px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-align: center;
+    }
+    .badge-tinggi { background-color: #f8d7da; color: #721c24; }
+    .badge-sedang { background-color: #fff3cd; color: #856404; }
+    .badge-rendah { background-color: #d1ecf1; color: #0c5460; }
+    .badge-aman   { background-color: #d4edda; color: #155724; }
+
+    /* Controls */
+    .controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-bottom: 1.2rem;
+    }
+
+    .controls h2 {
+      font-size: 1.3rem;
+      color: #2d3748;
+    }
+
+    .btn-refresh {
+      background-color: #2b6cb0;
+      color: #fff;
+      border: none;
+      padding: 0.6rem 1.2rem;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: background-color 0.2s;
+    }
+    .btn-refresh:hover { background-color: #2c5282; }
+
+    /* Findings Table */
+    .table-container {
+      background: #ffffff;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+
+    th {
+      background-color: #edf2f7;
+      color: #4a5568;
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 1rem 1.2rem;
+      border-bottom: 2px solid #e2e8f0;
+    }
+
+    td {
+      padding: 1.1rem 1.2rem;
+      border-bottom: 1px solid #edf2f7;
+      vertical-align: top;
+      font-size: 0.95rem;
+      line-height: 1.5;
+    }
+
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background-color: #f7fafc; }
+
+    .bucket-name {
+      font-weight: 600;
+      font-family: monospace;
+      color: #2b6cb0;
+    }
+
+    /* Error & Empty States */
+    .alert-box {
+      display: none;
+      padding: 1rem 1.4rem;
+      border-radius: 8px;
+      margin-bottom: 1.5rem;
+      font-size: 0.95rem;
+    }
+    .alert-error {
+      background-color: #fed7d7;
+      color: #9b2c2c;
+      border: 1px solid #feb2b2;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 3rem;
+      color: #a0aec0;
+      font-size: 0.85rem;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <h1>🛡️ JagaAwan Dashboard</h1>
+      <p>Pemantauan Postur Keamanan Google Cloud Storage untuk UMKM</p>
+    </header>
+
+    <div id="alert-box" class="alert-box alert-error" role="alert"></div>
+
+    <section class="score-card">
+      <div class="score-title">Skor Keamanan Cloud</div>
+      <div id="score-circle" class="score-circle score-green">-</div>
+      <div class="score-meta">
+        Waktu Pemindaian Terakhir: <strong id="scan-time">-</strong>
+      </div>
+    </section>
+
+    <div class="controls">
+      <h2>Daftar Temuan &amp; Rekomendasi</h2>
+      <button class="btn-refresh" onclick="fetchScanResults()">🔄 Muat Ulang Data</button>
+    </div>
+
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th style="width: 25%;">Nama Bucket</th>
+            <th style="width: 15%;">Tingkat Risiko</th>
+            <th style="width: 30%;">Penjelasan Awam</th>
+            <th style="width: 30%;">Saran Perbaikan</th>
+          </tr>
+        </thead>
+        <tbody id="findings-table-body">
+          <tr>
+            <td colspan="4" style="text-align: center; color: #a0aec0; padding: 2rem;">
+              Memuat data hasil pemindaian...
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <footer>
+      Proyek JagaAwan &mdash; Kelompok Teori Komputasi Awan (Data Uji Fiktif)
+    </footer>
+  </div>
+
+  <script>
+    // Konfigurasi endpoint:
+    // Gunakan "data-contoh.json" saat lokal / belum deploy Cloud Function
+    // Ganti dengan URL Cloud Function "results" publik dari Orang 1 saat online
+    const API_URL = "data-contoh.json";
+
+    function potong(str) {
+      return String(str || "").slice(0, 300);
+    }
+
+    function showAlert(msg) {
+      const box = document.getElementById("alert-box");
+      box.textContent = msg;
+      box.style.display = "block";
+    }
+
+    function hideAlert() {
+      const box = document.getElementById("alert-box");
+      box.style.display = "none";
+    }
+
+    function updateScoreDisplay(skor) {
+      const circle = document.getElementById("score-circle");
+      circle.textContent = skor;
+      circle.className = "score-circle";
+
+      if (skor >= 80) {
+        circle.classList.add("score-green");
+      } else if (skor >= 50) {
+        circle.classList.add("score-yellow");
+      } else {
+        circle.classList.add("score-red");
+      }
+    }
+
+    function renderFindings(findings) {
+      const tbody = document.getElementById("findings-table-body");
+      tbody.replaceChildren();
+
+      if (!Array.isArray(findings) || findings.length === 0) {
+        const tr = document.createElement("tr");
+        const td = document.createElement("td");
+        td.colSpan = 4;
+        td.style.textAlign = "center";
+        td.style.padding = "2rem";
+        td.style.color = "#28a745";
+        td.textContent = "🎉 Selamat! Tidak ditemukan konfigurasi berisiko pada bucket Cloud Storage Anda.";
+        tr.appendChild(td);
+        tbody.appendChild(tr);
+        return;
+      }
+
+      findings.forEach(t => {
+        const tr = document.createElement("tr");
+
+        // 1. Bucket
+        const tdBucket = document.createElement("td");
+        tdBucket.className = "bucket-name";
+        tdBucket.textContent = potong(t.bucket);
+        tr.appendChild(tdBucket);
+
+        // 2. Risiko Badge
+        const tdRisk = document.createElement("td");
+        const badge = document.createElement("span");
+        const risk = String(t.risiko || "").toUpperCase();
+        badge.className = "badge";
+        if (risk === "TINGGI") badge.classList.add("badge-tinggi");
+        else if (risk === "SEDANG") badge.classList.add("badge-sedang");
+        else if (risk === "RENDAH") badge.classList.add("badge-rendah");
+        else badge.classList.add("badge-aman");
+        badge.textContent = risk;
+        tdRisk.appendChild(badge);
+        tr.appendChild(tdRisk);
+
+        // 3. Penjelasan (Secure textContent)
+        const tdPenjelasan = document.createElement("td");
+        tdPenjelasan.textContent = potong(t.penjelasan);
+        tr.appendChild(tdPenjelasan);
+
+        // 4. Saran (Secure textContent)
+        const tdSaran = document.createElement("td");
+        tdSaran.textContent = potong(t.saran);
+        tr.appendChild(tdSaran);
+
+        tbody.appendChild(tr);
+      });
+    }
+
+    async function fetchScanResults() {
+      hideAlert();
+      try {
+        const res = await fetch(API_URL);
+        if (!res.ok) {
+          throw new Error("Gagal mengambil data dari server (Status: " + res.status + ")");
+        }
+        const data = await res.json();
+
+        // Validasi format angka skor
+        const skor = Number(data.skor);
+        if (!Number.isInteger(skor) || skor < 0 || skor > 100) {
+          throw new Error("Format skor yang diterima dari API tidak valid.");
+        }
+
+        updateScoreDisplay(skor);
+        document.getElementById("scan-time").textContent = data.scan_id || "Baru saja";
+        renderFindings(data.temuan || []);
+      } catch (err) {
+        showAlert("Peringatan: " + err.message);
+        document.getElementById("findings-table-body").innerHTML = `
+          <tr>
+            <td colspan="4" style="text-align: center; color: #dc3545; padding: 2rem;">
+              Gagal memuat hasil scan. Pastikan endpoint API aktif atau data-contoh.json tersedia.
+            </td>
+          </tr>
+        `;
+      }
+    }
+
+    // Jalankan saat pertama dibuka
+    fetchScanResults();
+  </script>
+
+</body>
+</html>

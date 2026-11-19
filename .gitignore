@@ -1,0 +1,14 @@
+.env
+*.key
+*.json.key
+service-account*.json
+*-key.json
+.env.*
+!.env.example
+output/
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+keys/
+*.enc

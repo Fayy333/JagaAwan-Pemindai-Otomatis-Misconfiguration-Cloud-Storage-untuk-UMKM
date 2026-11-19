@@ -1,0 +1,22 @@
+{
+  "scan_id": "2026-11-05T01:00:00Z",
+  "skor": 65,
+  "temuan": [
+    {
+      "bucket": "jagaawan-data-4827",
+      "risiko": "TINGGI",
+      "kode": "BUCKET_PUBLIK",
+      "penjelasan": "Siapa pun di internet bisa mengunduh semua file di sini.",
+      "saran": "Aktifkan Public Access Prevention dan hapus akses allUsers.",
+      "kurang": 30
+    },
+    {
+      "bucket": "jagaawan-foto-4827",
+      "risiko": "RENDAH",
+      "kode": "PAP_NONAKTIF",
+      "penjelasan": "Pengaman anti-akses-publik belum menyala.",
+      "saran": "Aktifkan Public Access Prevention jika bucket ini tidak memerlukan akses publik.",
+      "kurang": 5
+    }
+  ]
+}
